@@ -1,0 +1,75 @@
+## Users API
+1. Fetch Users (GET)
+curl --location 'http://localhost:8080/shubhekshaApi/users/get-users'
+
+2. User Details (GET)
+curl --location 'http://localhost:8080/shubhekshaApi/users/user-detail?userId=1'
+
+3. Update User (POST)
+curl --location 'http://localhost:8080/shubhekshaApi/users/update-user' \
+--header 'Content-Type: application/json' \
+--data '{
+        "userId": 1,
+        "userName": "nikhil.singhal1"
+    }'
+    
+## Product API
+1. Fetch All Products (GET) (It supports Pagination and filters - categoryId, productName, sku, offerPrice, listPrice, keywords)
+curl --location 'http://localhost:8080/shubhekshaApi/product/get-products'
+
+2. Product Details (Get)
+curl --location 'http://localhost:8080/shubhekshaApi/product/product-detail?productId=3'
+
+3. Product Inventory Update (POST) (Need to fix a bug that it make new entry of product ids)
+curl --location 'http://localhost:8080/shubhekshaApi/product/update-product-inventory' \
+--header 'Content-Type: application/json' \
+--data '{
+    "productId" : 3,
+    "unit" : 10
+}'
+
+2. Get Product Inventory (GET)
+curl --location 'http://localhost:8080/shubhekshaApi/product/get-product-inventory'
+
+3. Update Product Details (POST)
+curl --location 'http://localhost:8080/shubhekshaApi/product/update-product' \
+--header 'Content-Type: application/json' \
+--data '        {
+            "productId": 1,
+            "productName": "Rengoku Sword Katana 15cm"
+        }'
+        
+4. Add Product (POST) (Need to add HSN Code in Product Table)
+curl --location 'http://localhost:8080/shubhekshaApi/product/add-product' \
+--header 'Content-Type: application/json' \
+--data '        {
+            "productName": "Naruto Bobblehead Action Figure",
+            "sku" : "BH-08",
+            "productCategory" : 3,
+            "offerPrice" : 170.0,
+            "listPrice" : 500.0,
+            "description" : "Lovely Car Accessory to keep your journey alive and happy",
+            "productTitle" : "Naruto Bobblehead Action Figure",
+            "slug" : "naruto-bobblehead-action-figure",
+            "metaDescription" : "Naruto Merchandise from Naruto Anime",
+            "keywords" : "naruto bobblehead, naruto action figure",
+            "productImg" : "Naruto Bobblehead 13cm",
+            "productImgUrl" : "https://i.postimg.cc/3J0WSf8K/IMG-20230907-WA0005.jpg",
+            "productImgCaption" : "Buy Naruto Bobblehead in India"
+        }'
+        
+## Category API
+1. Fetch All Parent Category
+curl --location 'http://localhost:8080/shubhekshaApi/category/get-parent-categories'
+
+2. Fetch Sub category
+curl --location 'http://localhost:8080/shubhekshaApi/category/get-child-categories?parentId=5'
+
+3. Fetch Tree category
+curl --location 'http://localhost:8080/shubhekshaApi/category/get-all-categories'
+
+4. Fetch All categories
+curl --location 'http://localhost:8080/shubhekshaApi/category/get-categories'
+
+5. Fetch Category Details
+curl --location 'http://localhost:8080/shubhekshaApi/category/category-detail?categoryId=3'

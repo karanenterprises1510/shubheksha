@@ -1,0 +1,40 @@
+curl --location 'http://localhost:8080/shubhekshaApi/cart/save' \
+--header 'Content-Type: application/json' \
+--data '[
+    {
+    "productId" : 1,
+    "noOfUnit" : 5,
+    "unitPrice" : 950.0
+    },
+    {
+    "productId" : 11,
+    "noOfUnit" : 2,
+    "unitPrice" : 350.0
+    }
+]'
+
+curl --location 'http://localhost:8080/shubhekshaApi/order/save' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "cartId" : 1,
+    "orderAmt" : 4750.0,
+    "name" : "Piyush",
+    "email" : "s.piyush0708@gmail.com",
+    "mobile" : 8285314055,
+    "address" : "Executive Block, Alaknanda Apt, Rampuri, Surya Nagar",
+    "city" : "Ghaziabad",
+    "state" : "Uttar Pradesh",
+    "pincode" : 201011,
+    "gst" : "29GGGGG1314R9Z6"
+}'
+
+
+curl --location 'http://localhost:8080/shubhekshaApi/product/update-product-inventory' \
+--header 'Content-Type: application/json' \
+--data '{
+    "productId" : 3,
+    "unit" : 100
+}'
+
+
+command to run the jar - D:\Magicbricks\jdk-17.0.9\bin\java.exe -jar .\shubhekshaApi-0.0.1.jar
