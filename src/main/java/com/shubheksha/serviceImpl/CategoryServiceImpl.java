@@ -201,6 +201,7 @@ public class CategoryServiceImpl implements CategoryService {
 							&& !request.getPageTitle().equals(dbCat.getPageTitle())) {
 						dbCat.setPageTitle(request.getPageTitle());
 					}
+					dbCat.setModidate(new Date());
 					categoryWriteRepo.save(dbCat);
 					response = request;
 				} else {

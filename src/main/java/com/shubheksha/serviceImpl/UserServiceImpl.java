@@ -120,6 +120,8 @@ public class UserServiceImpl implements UserService {
 							&& !request.getUserName().equals(dbUser.getUsername())) {
 						dbUser.setUsername(request.getUserName());
 					}
+					Date currentDate = new Date();
+					dbUser.setModidate(currentDate);
 					usersWriteRepository.save(dbUser);
 					response = request;
 				} else {

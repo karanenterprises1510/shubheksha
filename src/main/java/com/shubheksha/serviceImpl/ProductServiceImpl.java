@@ -127,12 +127,16 @@ public class ProductServiceImpl implements ProductService {
 		Optional<Products> product = productsRepository.findById(request.getProductId());
 		if (product.isPresent()) {
 			if (request.getUnit() != null && request.getUnit() >= 0) {
-				Inventory inventory = new Inventory();
-				Date currentDate = new Date();
-				inventory.setProductId(request.getProductId());
+				Inventory inventory = null;
+				inventory = inventoryRepository.findByProductId(request.getProductId());
+				if (ObjectUtils.isEmpty(inventory)) {
+					inventory = new Inventory();
+					Date currentDate = new Date();
+					inventory.setCreatedate(currentDate);
+					inventory.setModidate(currentDate);
+					inventory.setProductId(request.getProductId());
+				}
 				inventory.setUnitsAvailable(request.getUnit());
-				inventory.setCreatedate(currentDate);
-				inventory.setModidate(currentDate);
 				inventoryWriteRepository.save(inventory);
 				return true;
 			} else {
@@ -247,6 +251,7 @@ public class ProductServiceImpl implements ProductService {
 					if (StringUtils.isNoneEmpty(request.getSlug()) && !request.getSlug().equals(dbProd.getSlug())) {
 						dbProd.setSlug(request.getSlug());
 					}
+					dbProd.setModidate(new Date());
 					productWriteRepo.save(dbProd);
 					response = request;
 				} else {

@@ -11,4 +11,7 @@ import com.shubheksha.model.Inventory;
 public interface InventoryRepository extends JpaRepository<Inventory, Long> {
 
 	List<Inventory> findByProductIdIn(List<Long> productIdList);
+
+	Inventory findByProductId(Long productId);
+
 }
