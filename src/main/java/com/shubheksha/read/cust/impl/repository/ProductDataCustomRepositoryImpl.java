@@ -29,19 +29,20 @@ public class ProductDataCustomRepositoryImpl implements ProductDataCustomReposit
 	private NamedParameterJdbcTemplate namedParameterMbJdbcTemplate;
 
 	@Override
-	public Page<ProductResponseDto> findProductData(List<Long> categoryIds, String productName, Integer sku, Double offerPrice,
-			Double listPrice, String keywords, Integer pageNo, Integer pageSize, String sortParam, String sortDir) {
+	public Page<ProductResponseDto> findProductData(List<Long> categoryIds, String productName, Integer sku,
+			Double offerPrice, Double listPrice, String keywords, Integer identifier, Integer pageNo, Integer pageSize,
+			String sortParam, String sortDir) {
 		try {
 			log.info("ProductDataCustomRepositoryImpl getting product data");
 			MapSqlParameterSource namedParameters = new MapSqlParameterSource();
 			String queryStringSelect = "SELECT pr.ID as productId, pr.PRODUCT_NAME as productName, pr.SKU as sku, pr.CATEGORY as productCategory, "
 					+ "ct.CATEGORY_NAME as productCatName, pr.OFFER_PRICE as offerPrice, pr.LIST_PRICE as listPrice, pr.DESCRIPTION as description, "
 					+ "pr.PRODUCT_TITLE as productTitle, pr.SLUG as slug, pr.META_DESCRIPTION as metaDescription, pr.RELATED_PRODUCTS as relatedProducts, "
-					+ "pr.CANONICAL_URL as canonicalUrl, pr.KEYWORDS as keywords, pr.PRODUCT_IMG as productImg, pr.PRODUCT_IMG_URL AS productImgUrl, "
+					+ "pr.CANONICAL_URL as canonicalUrl, pr.KEYWORDS as keywords, im.IDENTIFIER as identifier, pr.PRODUCT_IMG as productImg, pr.PRODUCT_IMG_URL AS productImgUrl, "
 					+ "pr.PRODUCT_IMG_CAPTION as productImgCaption, pr.PERMALINK as permalink, pr.ACTIVE as active, pr.CREATEDATE as createDate, pr.MODIDATE as modiDate ";
 			String queryStringCount = "SELECT COUNT(*) ";
 			StringBuilder queryStringFrom = new StringBuilder(
-					" from products pr join category ct on pr.CATEGORY=ct.ID" + " and ct.ACTIVE='Y' where 1=1 ");
+					" from products pr join category ct on pr.CATEGORY=ct.ID" + " and ct.ACTIVE='Y' join identifier_master im on im.id=pr.IDENTIFIER and im.ACTIVE='Y' where 1=1 ");
 
 			if (CollectionUtils.isNotEmpty(categoryIds)) {
 				queryStringFrom.append("and pr.CATEGORY IN (:category) ");
@@ -71,6 +72,11 @@ public class ProductDataCustomRepositoryImpl implements ProductDataCustomReposit
 			if (!StringUtils.isEmpty(keywords)) {
 				queryStringFrom.append("and pr.KEYWORDS like :keywords ");
 				namedParameters.addValue("keywords", "%" + keywords + "%");
+			}
+
+			if (identifier != null) {
+				queryStringFrom.append("and pr.IDENTIFIER like :identifier ");
+				namedParameters.addValue("identifier", identifier);
 			}
 
 			if (pageSize == null || pageSize <= 0) {

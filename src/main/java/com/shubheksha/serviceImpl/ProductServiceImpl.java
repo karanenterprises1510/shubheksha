@@ -15,13 +15,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import com.shubheksha.dto.ProdInventoryReqDto;
+import com.shubheksha.dto.ProductIdentifierResponseDto;
 import com.shubheksha.dto.ProductInventoryRespDto;
 import com.shubheksha.dto.ProductResponseDto;
 import com.shubheksha.model.Category;
+import com.shubheksha.model.IdentifierMaster;
 import com.shubheksha.model.Inventory;
 import com.shubheksha.model.Products;
 import com.shubheksha.read.cust.repository.ProductDataCustomRepository;
 import com.shubheksha.read.repository.CategoryRepository;
+import com.shubheksha.read.repository.IdentifierMasterRepository;
 import com.shubheksha.read.repository.InventoryRepository;
 import com.shubheksha.read.repository.ProductsRepository;
 import com.shubheksha.service.ProductService;
@@ -53,10 +56,13 @@ public class ProductServiceImpl implements ProductService {
 	@Autowired
 	private ProductsWriteRepository productWriteRepo;
 
+	@Autowired
+	private IdentifierMasterRepository identifierMasterRepo;
+
 	@Override
 	public Page<ProductResponseDto> fetchAllProducts(Long categoryId, String productName, Integer sku,
-			Double offerPrice, Double listPrice, String keywords, Integer pageNo, Integer pageSize, String sortParam,
-			String sortDir) {
+			Double offerPrice, Double listPrice, String keywords, Integer identifier, Integer pageNo, Integer pageSize,
+			String sortParam, String sortDir) {
 		log.info(
 				"Getting products based on category id : {}, product name : {}, sku : {}, offerPrice : {}, listPrice : {}, keywords : {}",
 				categoryId, productName, sku, offerPrice, listPrice, keywords);
@@ -72,7 +78,7 @@ public class ProductServiceImpl implements ProductService {
 				}
 			}
 			responseList = productCustRepo.findProductData(categoryIds, productName, sku, offerPrice, listPrice,
-					keywords, pageNo, pageSize, sortParam, sortDir);
+					keywords, identifier, pageNo, pageSize, sortParam, sortDir);
 			return responseList;
 		} catch (Exception e) {
 			log.error("Exception occured while fetching product data : ", e);
@@ -107,6 +113,12 @@ public class ProductServiceImpl implements ProductService {
 		prodDetail.setCreateDate(prod.getCreatedate());
 		prodDetail.setDescription(prod.getDescription());
 		prodDetail.setKeywords(prod.getKeywords());
+		if (prod.getIdentifier() != null) {
+			Optional<IdentifierMaster> im = identifierMasterRepo.findById(prod.getIdentifier());
+			if (im.isPresent()) {
+				prodDetail.setIdentifier(im.get().getIdentifier());
+			}
+		}
 		prodDetail.setListPrice(prod.getListPrice());
 		prodDetail.setMetaDescription(prod.getMetaDesc());
 		prodDetail.setModiDate(prod.getModidate());
@@ -222,6 +234,10 @@ public class ProductServiceImpl implements ProductService {
 					if (StringUtils.isNoneBlank(request.getKeywords())
 							&& !request.getKeywords().equals(dbProd.getKeywords())) {
 						dbProd.setKeywords(request.getKeywords());
+					}
+					if (request.getIdentifierId() != null
+							&& !request.getIdentifierId().equals(dbProd.getIdentifier())) {
+						dbProd.setIdentifier(request.getIdentifierId());
 					}
 					if (request.getListPrice() != null && !request.getListPrice().equals(dbProd.getListPrice())) {
 						dbProd.setListPrice(request.getListPrice());
@@ -348,6 +364,9 @@ public class ProductServiceImpl implements ProductService {
 			dbProduct.setProductImg(product.getProductImg());
 			dbProduct.setProductImgCaption(product.getProductImgCaption());
 			dbProduct.setProductImgUrl(product.getProductImgUrl());
+			if (product.getIdentifierId() != null) {
+				dbProduct.setIdentifier(product.getIdentifierId());
+			}
 			if (StringUtils.isEmpty(product.getProductName())) {
 				log.warn("Product name can not be empty");
 				return null;
@@ -403,7 +422,25 @@ public class ProductServiceImpl implements ProductService {
 				log.warn("Please type keywords");
 			}
 		} catch (Exception e) {
-			log.error("Exception occured while fetching product data : ", e);
+			log.error("Exception occured while fetching product name auto suggest : ", e);
+		}
+		return null;
+	}
+
+	@Override
+	public List<ProductIdentifierResponseDto> getProductIdentifierList() {
+		try {
+			List<IdentifierMaster> identifiers = identifierMasterRepo.findAll();
+			if (CollectionUtils.isNotEmpty(identifiers)) {
+				return identifiers.stream().filter(id -> id.getActive().equals(Constant.YES)).map(data -> {
+					ProductIdentifierResponseDto obj = new ProductIdentifierResponseDto();
+					obj.setIdentifierId(data.getId());
+					obj.setIdentifierName(data.getIdentifier());
+					return obj;
+				}).collect(Collectors.toList());
+			}
+		} catch (Exception e) {
+			log.error("Exception occured while fetching product identifier list : ", e);
 		}
 		return null;
 	}

@@ -28,6 +28,8 @@ public class ProductResponseDto implements Serializable {
 	private String relatedProducts;
 	private String canonicalUrl;
 	private String keywords;
+	private String identifier;
+	private Integer identifierId;
 	private String productImg;
 	private String productImgUrl;
 	private String productImgCaption;

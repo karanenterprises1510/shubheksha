@@ -38,6 +38,8 @@ public class Products {
 
 	private String description;
 
+	private Integer identifier;
+	
 	@Column(name = "PRODUCT_TITLE")
 	private String productTitle;
 

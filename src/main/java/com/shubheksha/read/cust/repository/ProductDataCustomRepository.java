@@ -9,5 +9,5 @@ import com.shubheksha.dto.ProductResponseDto;
 public interface ProductDataCustomRepository {
 
 	Page<ProductResponseDto> findProductData(List<Long> categoryId, String productName, Integer sku, Double offerPrice,
-			Double listPrice, String keywords, Integer pageNo, Integer pageSize, String sortParam, String sortDir);
+			Double listPrice, String keywords, Integer identifier, Integer pageNo, Integer pageSize, String sortParam, String sortDir);
 }

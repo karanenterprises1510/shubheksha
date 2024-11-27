@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shubheksha.dto.ProdInventoryReqDto;
+import com.shubheksha.dto.ProductIdentifierResponseDto;
 import com.shubheksha.dto.ProductInventoryRespDto;
 import com.shubheksha.dto.ProductResponseDto;
 import com.shubheksha.service.ProductService;
@@ -35,15 +36,15 @@ public class ProductController {
 	public ResponseEntity<?> getProducts(@RequestParam(required = false) Long categoryId,
 			@RequestParam(required = false) String productName, @RequestParam(required = false) Integer sku,
 			@RequestParam(required = false) Double offerPrice, @RequestParam(required = false) Double listPrice,
-			@RequestParam(required = false) String keywords, @RequestParam(required = false) Integer pageNo,
-			@RequestParam(required = false) Integer pageSize, @RequestParam(required = false) String sortParam,
-			@RequestParam(required = false) String sortDir) {
+			@RequestParam(required = false) String keywords, @RequestParam(required = false) Integer identifier,
+			@RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize,
+			@RequestParam(required = false) String sortParam, @RequestParam(required = false) String sortDir) {
 		final Map<String, Object> result = new HashMap<>();
 		String status = null;
 		String message = null;
 		try {
 			final Page<ProductResponseDto> data = productService.fetchAllProducts(categoryId, productName, sku,
-					offerPrice, listPrice, keywords, pageNo, pageSize, sortParam, sortDir);
+					offerPrice, listPrice, keywords, identifier, pageNo, pageSize, sortParam, sortDir);
 			if (data != null && data.hasContent()) {
 				status = Constant.OK;
 				message = Constant.RESPONSE_SUCCESS_MESSAGE;
@@ -206,7 +207,7 @@ public class ProductController {
 		result.put(Constant.MESSAGE, message);
 		return ResponseEntity.ok().body(result);
 	}
-	
+
 	@GetMapping("/get-product-name-list")
 	public ResponseEntity<?> getProductsNameList(@RequestParam(required = false) String keyword) {
 		final Map<String, Object> result = new HashMap<>();
@@ -214,6 +215,30 @@ public class ProductController {
 		String message = null;
 		try {
 			final List<String> data = productService.getProductNames(keyword);
+			if (CollectionUtils.isNotEmpty(data)) {
+				status = Constant.OK;
+				message = Constant.RESPONSE_SUCCESS_MESSAGE;
+				result.put(Constant.LIST, data);
+			} else {
+				status = Constant.NO_DATA;
+				message = Constant.NO_DATA_MESSAGE;
+			}
+		} catch (Exception e) {
+			status = Constant.SERVER_ERROR;
+			message = Constant.RESPONSE_UNSUCCESS_MESSAGE;
+		}
+		result.put(Constant.STATUS, status);
+		result.put(Constant.MESSAGE, message);
+		return ResponseEntity.ok().body(result);
+	}
+
+	@GetMapping("/get-product-identifier-list")
+	public ResponseEntity<?> getProductsIdentifierList() {
+		final Map<String, Object> result = new HashMap<>();
+		String status = null;
+		String message = null;
+		try {
+			final List<ProductIdentifierResponseDto> data = productService.getProductIdentifierList();
 			if (CollectionUtils.isNotEmpty(data)) {
 				status = Constant.OK;
 				message = Constant.RESPONSE_SUCCESS_MESSAGE;
