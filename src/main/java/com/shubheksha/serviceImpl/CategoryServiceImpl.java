@@ -83,6 +83,7 @@ public class CategoryServiceImpl implements CategoryService {
 			catDTO.setDescription(categoryDBObj.getDescription());
 			catDTO.setKeywords(categoryDBObj.getKeywords());
 			catDTO.setPageTitle(categoryDBObj.getPageTitle());
+			catDTO.setCatImg(categoryDBObj.getCategoryImg());
 			if (!ObjectUtils.isEmpty(categoryDBObj.getParentCategory())) {
 				catDTO.setParentId(categoryDBObj.getParentCategory());
 				Optional<Category> parentCat = categoryRepo.findById(categoryDBObj.getParentCategory());
@@ -201,6 +202,10 @@ public class CategoryServiceImpl implements CategoryService {
 							&& !request.getPageTitle().equals(dbCat.getPageTitle())) {
 						dbCat.setPageTitle(request.getPageTitle());
 					}
+					if (StringUtils.isNoneBlank(request.getCatImg())
+							&& !request.getCatImg().equals(dbCat.getCategoryImg())) {
+						dbCat.setCategoryImg(request.getCatImg());
+					}
 					dbCat.setModidate(new Date());
 					categoryWriteRepo.save(dbCat);
 					response = request;
@@ -288,6 +293,9 @@ public class CategoryServiceImpl implements CategoryService {
 					dbCategory.setParentCategory(category.getParentId());
 				}
 			}
+			if (StringUtils.isNotEmpty(category.getCatImg())) {
+				dbCategory.setCategoryImg(category.getCatImg());
+			}
 			Date currentDate = new Date();
 			dbCategory.setActive(Constant.YES);
 			dbCategory.setCreatedate(currentDate);
@@ -310,6 +318,7 @@ public class CategoryServiceImpl implements CategoryService {
 		categoryDetail.setChildCategories(fetchChildCategories(category.getId()));
 		categoryDetail.setKeywords(category.getKeywords());
 		categoryDetail.setPageTitle(category.getPageTitle());
+		categoryDetail.setCatImg(category.getCategoryImg());
 		if (!ObjectUtils.isEmpty(category.getParentCategory())) {
 			categoryDetail.setParentId(category.getParentCategory());
 			Optional<Category> parentCat = categoryRepo.findById(category.getParentCategory());

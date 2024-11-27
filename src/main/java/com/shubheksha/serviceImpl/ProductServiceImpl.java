@@ -1,5 +1,6 @@
 package com.shubheksha.serviceImpl;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -61,7 +62,16 @@ public class ProductServiceImpl implements ProductService {
 				categoryId, productName, sku, offerPrice, listPrice, keywords);
 		Page<ProductResponseDto> responseList = Page.empty();
 		try {
-			responseList = productCustRepo.findProductData(categoryId, productName, sku, offerPrice, listPrice,
+			List<Long> categoryIds = new ArrayList<>();
+			if (!ObjectUtils.isEmpty(categoryId)) {
+				categoryIds.add(categoryId);
+				List<Category> childCategories = categoryRepository.findByParentCategoryAndActive(categoryId,
+						Constant.YES);
+				if (CollectionUtils.isNotEmpty(childCategories)) {
+					categoryIds.addAll(childCategories.stream().map(Category::getId).collect(Collectors.toList()));
+				}
+			}
+			responseList = productCustRepo.findProductData(categoryIds, productName, sku, offerPrice, listPrice,
 					keywords, pageNo, pageSize, sortParam, sortDir);
 			return responseList;
 		} catch (Exception e) {
@@ -382,5 +392,19 @@ public class ProductServiceImpl implements ProductService {
 			log.warn("empty requets");
 		}
 		return response;
+	}
+
+	@Override
+	public List<String> getProductNames(String keyword) {
+		try {
+			if (StringUtils.isNoneEmpty(keyword)) {
+				return productsRepository.getProductNameList(keyword);
+			} else {
+				log.warn("Please type keywords");
+			}
+		} catch (Exception e) {
+			log.error("Exception occured while fetching product data : ", e);
+		}
+		return null;
 	}
 }

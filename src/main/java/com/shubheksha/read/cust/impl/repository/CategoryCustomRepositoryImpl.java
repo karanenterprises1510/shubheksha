@@ -36,7 +36,7 @@ public class CategoryCustomRepositoryImpl implements CategoryCustomRepository {
 			log.info("CategoryCustomRepositoryImpl getting category data");
 			MapSqlParameterSource namedParameters = new MapSqlParameterSource();
 			String queryStringSelect = "SELECT c.ID AS categoryId, c.CATEGORY_NAME AS categoryName, pc.ID AS parentId, pc.CATEGORY_NAME AS parentName, c.SLUG AS catSlug, c.TITLE AS catTitle, c.PAGE_TITLE AS pageTitle,"
-					+ " c.DESCRIPTION AS description, c.KEYWORDS AS keywords ";
+					+ " c.DESCRIPTION AS description, c.KEYWORDS AS keywords, c.CATEGORY_IMG as catImg ";
 			String queryStringCount = "SELECT COUNT(*) ";
 			StringBuilder queryStringFrom = new StringBuilder(
 					" FROM category c LEFT JOIN category pc ON pc.ID = c.PARENT_CATEGORY" + " and pc.ACTIVE='Y' where 1=1 ");

@@ -29,7 +29,7 @@ public class ProductDataCustomRepositoryImpl implements ProductDataCustomReposit
 	private NamedParameterJdbcTemplate namedParameterMbJdbcTemplate;
 
 	@Override
-	public Page<ProductResponseDto> findProductData(Long categoryId, String productName, Integer sku, Double offerPrice,
+	public Page<ProductResponseDto> findProductData(List<Long> categoryIds, String productName, Integer sku, Double offerPrice,
 			Double listPrice, String keywords, Integer pageNo, Integer pageSize, String sortParam, String sortDir) {
 		try {
 			log.info("ProductDataCustomRepositoryImpl getting product data");
@@ -43,9 +43,9 @@ public class ProductDataCustomRepositoryImpl implements ProductDataCustomReposit
 			StringBuilder queryStringFrom = new StringBuilder(
 					" from products pr join category ct on pr.CATEGORY=ct.ID" + " and ct.ACTIVE='Y' where 1=1 ");
 
-			if (!ObjectUtils.isEmpty(categoryId)) {
+			if (CollectionUtils.isNotEmpty(categoryIds)) {
 				queryStringFrom.append("and pr.CATEGORY IN (:category) ");
-				namedParameters.addValue("category", categoryId);
+				namedParameters.addValue("category", categoryIds);
 			}
 
 			if (StringUtils.isNotEmpty(productName)) {

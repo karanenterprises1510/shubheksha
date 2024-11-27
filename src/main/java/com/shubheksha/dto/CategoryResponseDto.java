@@ -23,5 +23,6 @@ public class CategoryResponseDto implements Serializable {
 	private String pageTitle;
 	private String description;
 	private String keywords;
+	private String catImg;
 	private List<CategoryResponseDto> childCategories;
 }

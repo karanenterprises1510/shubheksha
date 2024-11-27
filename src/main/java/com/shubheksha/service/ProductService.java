@@ -25,5 +25,7 @@ public interface ProductService {
 	boolean deactivateProduct(Long productId);
 
 	ProductResponseDto addProduct(ProductResponseDto product);
+	
+	List<String> getProductNames(String keyword);
 
 }
