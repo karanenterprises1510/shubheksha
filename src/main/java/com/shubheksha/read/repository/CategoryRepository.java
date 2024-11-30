@@ -14,4 +14,6 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
 	List<Category> findByParentCategoryAndActive(Long parentCategory, String active);
 
+	List<Category> findByHomeCardAndActive(String homeCard, String active);
+
 }

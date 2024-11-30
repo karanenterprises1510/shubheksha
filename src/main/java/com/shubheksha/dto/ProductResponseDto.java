@@ -2,6 +2,7 @@ package com.shubheksha.dto;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -30,11 +31,11 @@ public class ProductResponseDto implements Serializable {
 	private String keywords;
 	private String identifier;
 	private Integer identifierId;
-	private String productImg;
-	private String productImgUrl;
-	private String productImgCaption;
+	private List<ProductImageDto> imageList;
 	private String permalink;
 	private String active;
 	private Date createDate;
 	private Date modiDate;
+	private boolean inStock;
+	private Integer unitsAvailable;
 }

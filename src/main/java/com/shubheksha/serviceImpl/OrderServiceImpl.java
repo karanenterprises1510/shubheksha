@@ -2,9 +2,11 @@ package com.shubheksha.serviceImpl;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,15 +19,18 @@ import com.shubheksha.dto.OrderResponseDto;
 import com.shubheksha.model.Cart;
 import com.shubheksha.model.CartProductMap;
 import com.shubheksha.model.Customers;
+import com.shubheksha.model.Inventory;
 import com.shubheksha.model.Orders;
 import com.shubheksha.read.repository.CartProductMapRepository;
 import com.shubheksha.read.repository.CartRepository;
 import com.shubheksha.read.repository.CustomersRepository;
+import com.shubheksha.read.repository.InventoryRepository;
 import com.shubheksha.read.repository.OrdersRepository;
 import com.shubheksha.service.OrderService;
 import com.shubheksha.service.common.TwilioService;
 import com.shubheksha.utils.Constant;
 import com.shubheksha.write.repository.CustomersWriteRepository;
+import com.shubheksha.write.repository.InventoryWriteRepository;
 import com.shubheksha.write.repository.OrdersWriteRepository;
 
 import lombok.extern.slf4j.Slf4j;
@@ -54,6 +59,12 @@ public class OrderServiceImpl implements OrderService {
 
 	@Autowired
 	TwilioService twilioService;
+
+	@Autowired
+	InventoryWriteRepository inventoryWriteRepository;
+
+	@Autowired
+	InventoryRepository inventoryRepository;
 
 	private Orders processOrder(final OrderRequestDto request) {
 		Orders order = null;
@@ -159,6 +170,25 @@ public class OrderServiceImpl implements OrderService {
 			orderObj.setApproved(Constant.YES);
 			orderObj.setModidate(new Date());
 			orderWriteRepository.save(orderObj);
+			Optional<Cart> cart = cartRepository.findById(orderObj.getCartId());
+			if (cart.isPresent()) {
+				Cart cartObj = cart.get();
+				List<CartProductMap> cartProdMap = cartProductMapRepository.findByCartIdAndActive(cartObj.getId(),
+						Constant.YES);
+				if (CollectionUtils.isNotEmpty(cartProdMap)) {
+					Map<Long, List<CartProductMap>> productMap = cartProdMap.stream()
+							.collect(Collectors.groupingBy(CartProductMap::getProductId));
+					List<Inventory> productInventories = inventoryRepository
+							.findByProductIdIn(productMap.keySet().stream().collect(Collectors.toList()));
+					productInventories.forEach(inventory -> {
+						if (productMap.containsKey(inventory.getProductId())) {
+							inventory.setUnitsAvailable(inventory.getUnitsAvailable()
+									- productMap.get(inventory.getProductId()).get(0).getUnit());
+						}
+					});
+					inventoryWriteRepository.saveAll(productInventories);
+				}
+			}
 			// Sending confirmation message to customer.
 			Optional<Customers> customer = customersRepository.findById(order.get().getCustomerId());
 			if (customer.isPresent()) {

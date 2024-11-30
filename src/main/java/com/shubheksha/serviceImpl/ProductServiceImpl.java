@@ -16,20 +16,24 @@ import org.springframework.util.ObjectUtils;
 
 import com.shubheksha.dto.ProdInventoryReqDto;
 import com.shubheksha.dto.ProductIdentifierResponseDto;
+import com.shubheksha.dto.ProductImageDto;
 import com.shubheksha.dto.ProductInventoryRespDto;
 import com.shubheksha.dto.ProductResponseDto;
 import com.shubheksha.model.Category;
 import com.shubheksha.model.IdentifierMaster;
 import com.shubheksha.model.Inventory;
 import com.shubheksha.model.Products;
+import com.shubheksha.model.ProductsImages;
 import com.shubheksha.read.cust.repository.ProductDataCustomRepository;
 import com.shubheksha.read.repository.CategoryRepository;
 import com.shubheksha.read.repository.IdentifierMasterRepository;
 import com.shubheksha.read.repository.InventoryRepository;
+import com.shubheksha.read.repository.ProductsImagesRepository;
 import com.shubheksha.read.repository.ProductsRepository;
 import com.shubheksha.service.ProductService;
 import com.shubheksha.utils.Constant;
 import com.shubheksha.write.repository.InventoryWriteRepository;
+import com.shubheksha.write.repository.ProductsImagesWriteRepository;
 import com.shubheksha.write.repository.ProductsWriteRepository;
 
 import lombok.extern.slf4j.Slf4j;
@@ -59,6 +63,12 @@ public class ProductServiceImpl implements ProductService {
 	@Autowired
 	private IdentifierMasterRepository identifierMasterRepo;
 
+	@Autowired
+	private ProductsImagesRepository productsImagesRepo;
+
+	@Autowired
+	ProductsImagesWriteRepository productsImagesWriteRepo;
+
 	@Override
 	public Page<ProductResponseDto> fetchAllProducts(Long categoryId, String productName, Integer sku,
 			Double offerPrice, Double listPrice, String keywords, Integer identifier, Integer pageNo, Integer pageSize,
@@ -79,11 +89,39 @@ public class ProductServiceImpl implements ProductService {
 			}
 			responseList = productCustRepo.findProductData(categoryIds, productName, sku, offerPrice, listPrice,
 					keywords, identifier, pageNo, pageSize, sortParam, sortDir);
+			if (responseList.hasContent()) {
+				responseList.getContent().parallelStream().forEach(prod -> {
+					Inventory inventory = inventoryRepository.findByProductId(prod.getProductId());
+					if (!ObjectUtils.isEmpty(inventory)) {
+						prod.setInStock(inventory.getUnitsAvailable() > 0);
+						prod.setUnitsAvailable(inventory.getUnitsAvailable());
+					}
+					List<ProductsImages> images = productsImagesRepo.findByProductIdAndActive(prod.getProductId(),
+							Constant.YES);
+					if (CollectionUtils.isNotEmpty(images)) {
+						List<ProductImageDto> imgList = getImgDTOList(images);
+						prod.setImageList(imgList);
+					}
+				});
+			}
 			return responseList;
 		} catch (Exception e) {
 			log.error("Exception occured while fetching product data : ", e);
 		}
 		return null;
+	}
+
+	private List<ProductImageDto> getImgDTOList(final List<ProductsImages> images) {
+		final List<ProductImageDto> imgList = images.stream().map(img -> {
+			ProductImageDto imgDto = new ProductImageDto();
+			imgDto.setImageId(img.getId());
+			imgDto.setProductImg(img.getImgName());
+			imgDto.setProductImgCaption(img.getImgCaption());
+			imgDto.setProductImgUrl(img.getImgUrl());
+			imgDto.setPrimary(Constant.YES.equals(img.getIsPrimary()));
+			return imgDto;
+		}).collect(Collectors.toList());
+		return imgList;
 	}
 
 	@Override
@@ -132,14 +170,20 @@ public class ProductServiceImpl implements ProductService {
 			}
 		}
 		prodDetail.setProductId(prod.getId());
-		prodDetail.setProductImg(prod.getProductImg());
-		prodDetail.setProductImgCaption(prod.getProductImgCaption());
-		prodDetail.setProductImgUrl(prod.getProductImgUrl());
 		prodDetail.setProductName(prod.getProductName());
 		prodDetail.setProductTitle(prod.getProductTitle());
 		prodDetail.setRelatedProducts(prod.getRelatedProducts());
 		prodDetail.setSku(prod.getSku());
 		prodDetail.setSlug(prod.getSlug());
+		List<ProductsImages> images = productsImagesRepo.findByProductIdAndActive(prod.getId(), Constant.YES);
+		if (CollectionUtils.isNotEmpty(images)) {
+			prodDetail.setImageList(getImgDTOList(images));
+		}
+		Inventory inventory = inventoryRepository.findByProductId(prod.getId());
+		if (!ObjectUtils.isEmpty(inventory)) {
+			prodDetail.setInStock(inventory.getUnitsAvailable() > 0);
+			prodDetail.setUnitsAvailable(inventory.getUnitsAvailable());
+		}
 		return prodDetail;
 	}
 
@@ -278,6 +322,28 @@ public class ProductServiceImpl implements ProductService {
 						dbProd.setSlug(request.getSlug());
 					}
 					dbProd.setModidate(new Date());
+					if (CollectionUtils.isNotEmpty(request.getImageList())) {
+						List<ProductsImages> imageList = request.getImageList().stream().map(prod -> {
+							ProductsImages prodImg = new ProductsImages();
+							prodImg.setProductId(dbProd.getId());
+							prodImg.setImgCaption(prod.getProductImgCaption());
+							prodImg.setImgName(prod.getProductImg());
+							prodImg.setImgUrl(prod.getProductImgUrl());
+							prodImg.setActive(Constant.YES);
+							prodImg.setIsPrimary(prod.isPrimary() ? Constant.YES : Constant.NO);
+							return prodImg;
+						}).collect(Collectors.toList());
+						List<ProductsImages> existingImgs = productsImagesRepo
+								.findByProductIdAndActive(request.getProductId(), Constant.YES);
+						if (CollectionUtils.isNotEmpty(existingImgs)) {
+							existingImgs.forEach(existingImg -> {
+								existingImg.setActive(Constant.NO);
+								existingImg.setModidate(new Date());
+							});
+							productsImagesWriteRepo.saveAll(existingImgs);
+						}
+						productsImagesWriteRepo.saveAll(imageList);
+					}
 					productWriteRepo.save(dbProd);
 					response = request;
 				} else {
@@ -361,9 +427,6 @@ public class ProductServiceImpl implements ProductService {
 					return null;
 				}
 			}
-			dbProduct.setProductImg(product.getProductImg());
-			dbProduct.setProductImgCaption(product.getProductImgCaption());
-			dbProduct.setProductImgUrl(product.getProductImgUrl());
 			if (product.getIdentifierId() != null) {
 				dbProduct.setIdentifier(product.getIdentifierId());
 			}
@@ -406,6 +469,19 @@ public class ProductServiceImpl implements ProductService {
 			dbProduct.setCreatedby(0l);
 			dbProduct.setModifiedby(0l);
 			productWriteRepo.save(dbProduct);
+			if (CollectionUtils.isNotEmpty(product.getImageList())) {
+				List<ProductsImages> imageList = product.getImageList().stream().map(prod -> {
+					ProductsImages prodImg = new ProductsImages();
+					prodImg.setProductId(dbProduct.getId());
+					prodImg.setImgCaption(prod.getProductImgCaption());
+					prodImg.setImgName(prod.getProductImg());
+					prodImg.setImgUrl(prod.getProductImgUrl());
+					prodImg.setActive(Constant.YES);
+					prodImg.setIsPrimary(prod.isPrimary() ? Constant.YES : Constant.NO);
+					return prodImg;
+				}).collect(Collectors.toList());
+				productsImagesWriteRepo.saveAll(imageList);
+			}
 			response = product;
 		} else {
 			log.warn("empty requets");

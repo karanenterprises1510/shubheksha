@@ -41,6 +41,9 @@ public class Category implements Serializable {
 	@Column(name = "PARENT_CATEGORY")
 	private Long parentCategory;
 
+	@Column(name = "HOME_CARD")
+	private String homeCard = "Y";
+	
 	private String active = "Y";
 
 	private Date createdate;

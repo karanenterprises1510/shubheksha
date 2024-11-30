@@ -10,6 +10,8 @@ import com.shubheksha.dto.CategoryTreeResponseDto;
 public interface CategoryService {
 
 	List<CategoryResponseDto> fetchAllParentCategories();
+	
+	List<CategoryResponseDto> fetchAllHomeCategories();
 
 	List<CategoryResponseDto> fetchChildCategories(final Long parentCategory);
 

@@ -30,6 +30,30 @@ public class CategoryController {
 	@Autowired
 	CategoryService categoryService;
 
+	@GetMapping("/get-home-categories")
+	public ResponseEntity<?> getHomeCategories() {
+		final Map<String, Object> result = new HashMap<>();
+		String status = null;
+		String message = null;
+		try {
+			final List<CategoryResponseDto> data = categoryService.fetchAllHomeCategories();
+			if (CollectionUtils.isNotEmpty(data)) {
+				status = Constant.OK;
+				message = Constant.RESPONSE_SUCCESS_MESSAGE;
+				result.put(Constant.LIST, data);
+			} else {
+				status = Constant.NO_DATA;
+				message = Constant.NO_DATA_MESSAGE;
+			}
+		} catch (Exception e) {
+			status = Constant.SERVER_ERROR;
+			message = Constant.RESPONSE_UNSUCCESS_MESSAGE;
+		}
+		result.put(Constant.STATUS, status);
+		result.put(Constant.MESSAGE, message);
+		return ResponseEntity.ok().body(result);
+	}
+	
 	@GetMapping("/get-parent-categories")
 	public ResponseEntity<?> getParentCategories() {
 		final Map<String, Object> result = new HashMap<>();

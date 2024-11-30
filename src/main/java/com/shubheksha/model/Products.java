@@ -56,15 +56,6 @@ public class Products {
 
 	private String keywords;
 
-	@Column(name = "PRODUCT_IMG")
-	private String productImg;
-
-	@Column(name = "PRODUCT_IMG_URL")
-	private String productImgUrl;
-
-	@Column(name = "PRODUCT_IMG_CAPTION")
-	private String productImgCaption;
-
 	private String permalink;
 
 	private String active;

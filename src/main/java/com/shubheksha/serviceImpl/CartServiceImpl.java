@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
@@ -16,8 +17,10 @@ import com.shubheksha.dto.CartRequestDto;
 import com.shubheksha.dto.CartResponseDto;
 import com.shubheksha.model.Cart;
 import com.shubheksha.model.CartProductMap;
+import com.shubheksha.model.Inventory;
 import com.shubheksha.read.repository.CartProductMapRepository;
 import com.shubheksha.read.repository.CartRepository;
+import com.shubheksha.read.repository.InventoryRepository;
 import com.shubheksha.service.CartService;
 import com.shubheksha.utils.Constant;
 import com.shubheksha.write.repository.CartProductMapWriteRepository;
@@ -41,11 +44,27 @@ public class CartServiceImpl implements CartService {
 	@Autowired
 	CartProductMapRepository cartProductMapRepository;
 
+	@Autowired
+	InventoryRepository inventoryRepository;
+
 	@Override
 	public Long saveCartDetails(List<CartRequestDto> request) {
 		log.info("saving cart detail with details : {}", request.toString());
 		AtomicLong cartId = new AtomicLong();
 		try {
+			// validating cart details
+			final AtomicBoolean validateUnits = new AtomicBoolean(Boolean.TRUE);
+			for (CartRequestDto prod : request) {
+				Inventory inventory = inventoryRepository.findByProductId(prod.getProductId());
+				if (ObjectUtils.isEmpty(inventory) || inventory.getUnitsAvailable() < prod.getNoOfUnit()) {
+					validateUnits.set(Boolean.FALSE);
+					break;
+				}
+			}
+			if (!validateUnits.get()) {
+				log.warn("Product units are not available");
+				return null;
+			}
 			List<CartProductMap> cartProdMap = getCartEntity(request);
 			final Cart cart = new Cart();
 			if (CollectionUtils.isNotEmpty(cartProdMap)) {

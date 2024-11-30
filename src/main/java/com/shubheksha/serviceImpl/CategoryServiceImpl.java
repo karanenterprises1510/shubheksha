@@ -328,4 +328,21 @@ public class CategoryServiceImpl implements CategoryService {
 		}
 		return categoryDetail;
 	}
+
+	@Override
+	public List<CategoryResponseDto> fetchAllHomeCategories() {
+		log.info("Getting home categories");
+		try {
+			final List<Category> homeCategories = categoryRepo.findByHomeCardAndActive(Constant.YES, Constant.YES);
+			if (!homeCategories.isEmpty()) {
+				return homeCategories.stream().map(this::mapCatEntityToCatDTO).filter(Objects::nonNull)
+						.collect(Collectors.toList());
+			} else {
+				log.warn("No home category found in the system");
+			}
+		} catch (Exception e) {
+			log.error("Exception occured while fetching home categories : ", e);
+		}
+		return null;
+	}
 }
