@@ -11,7 +11,7 @@ import com.shubheksha.dto.ProductResponseDto;
 
 public interface ProductService {
 
-	Page<ProductResponseDto> fetchAllProducts(final Long categoryId, final String productName, final Integer sku,
+	Page<ProductResponseDto> fetchAllProducts(final List<Long> productIds, final Long categoryId, final String productName, final Integer sku,
 			final Double offerPrice, final Double listPrice, final String keywords, final Integer identifier, final Integer pageNo,
 			final Integer pageSize, final String sortParam, final String sortDir);
 

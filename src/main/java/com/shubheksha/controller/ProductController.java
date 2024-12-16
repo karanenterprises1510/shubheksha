@@ -33,18 +33,19 @@ public class ProductController {
 	ProductService productService;
 
 	@GetMapping("/get-products")
-	public ResponseEntity<?> getProducts(@RequestParam(required = false) Long categoryId,
-			@RequestParam(required = false) String productName, @RequestParam(required = false) Integer sku,
-			@RequestParam(required = false) Double offerPrice, @RequestParam(required = false) Double listPrice,
-			@RequestParam(required = false) String keywords, @RequestParam(required = false) Integer identifier,
-			@RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize,
-			@RequestParam(required = false) String sortParam, @RequestParam(required = false) String sortDir) {
+	public ResponseEntity<?> getProducts(@RequestParam(required = false) List<Long> productIds,
+			@RequestParam(required = false) Long categoryId, @RequestParam(required = false) String productName,
+			@RequestParam(required = false) Integer sku, @RequestParam(required = false) Double offerPrice,
+			@RequestParam(required = false) Double listPrice, @RequestParam(required = false) String keywords,
+			@RequestParam(required = false) Integer identifier, @RequestParam(required = false) Integer pageNo,
+			@RequestParam(required = false) Integer pageSize, @RequestParam(required = false) String sortParam,
+			@RequestParam(required = false) String sortDir) {
 		final Map<String, Object> result = new HashMap<>();
 		String status = null;
 		String message = null;
 		try {
-			final Page<ProductResponseDto> data = productService.fetchAllProducts(categoryId, productName, sku,
-					offerPrice, listPrice, keywords, identifier, pageNo, pageSize, sortParam, sortDir);
+			final Page<ProductResponseDto> data = productService.fetchAllProducts(productIds, categoryId, productName,
+					sku, offerPrice, listPrice, keywords, identifier, pageNo, pageSize, sortParam, sortDir);
 			if (data != null && data.hasContent()) {
 				status = Constant.OK;
 				message = Constant.RESPONSE_SUCCESS_MESSAGE;

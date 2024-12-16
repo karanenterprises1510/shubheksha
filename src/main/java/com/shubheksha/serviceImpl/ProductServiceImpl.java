@@ -70,9 +70,9 @@ public class ProductServiceImpl implements ProductService {
 	ProductsImagesWriteRepository productsImagesWriteRepo;
 
 	@Override
-	public Page<ProductResponseDto> fetchAllProducts(Long categoryId, String productName, Integer sku,
-			Double offerPrice, Double listPrice, String keywords, Integer identifier, Integer pageNo, Integer pageSize,
-			String sortParam, String sortDir) {
+	public Page<ProductResponseDto> fetchAllProducts(List<Long> productIds, Long categoryId, String productName,
+			Integer sku, Double offerPrice, Double listPrice, String keywords, Integer identifier, Integer pageNo,
+			Integer pageSize, String sortParam, String sortDir) {
 		log.info(
 				"Getting products based on category id : {}, product name : {}, sku : {}, offerPrice : {}, listPrice : {}, keywords : {}",
 				categoryId, productName, sku, offerPrice, listPrice, keywords);
@@ -87,8 +87,8 @@ public class ProductServiceImpl implements ProductService {
 					categoryIds.addAll(childCategories.stream().map(Category::getId).collect(Collectors.toList()));
 				}
 			}
-			responseList = productCustRepo.findProductData(categoryIds, productName, sku, offerPrice, listPrice,
-					keywords, identifier, pageNo, pageSize, sortParam, sortDir);
+			responseList = productCustRepo.findProductData(productIds, categoryIds, productName, sku, offerPrice,
+					listPrice, keywords, identifier, pageNo, pageSize, sortParam, sortDir);
 			if (responseList.hasContent()) {
 				responseList.getContent().parallelStream().forEach(prod -> {
 					Inventory inventory = inventoryRepository.findByProductId(prod.getProductId());
@@ -512,6 +512,7 @@ public class ProductServiceImpl implements ProductService {
 					ProductIdentifierResponseDto obj = new ProductIdentifierResponseDto();
 					obj.setIdentifierId(data.getId());
 					obj.setIdentifierName(data.getIdentifier());
+					obj.setImgLink(data.getImage());
 					return obj;
 				}).collect(Collectors.toList());
 			}

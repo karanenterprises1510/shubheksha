@@ -8,6 +8,6 @@ import com.shubheksha.dto.ProductResponseDto;
 
 public interface ProductDataCustomRepository {
 
-	Page<ProductResponseDto> findProductData(List<Long> categoryId, String productName, Integer sku, Double offerPrice,
+	Page<ProductResponseDto> findProductData(List<Long> productIds, List<Long> categoryId, String productName, Integer sku, Double offerPrice,
 			Double listPrice, String keywords, Integer identifier, Integer pageNo, Integer pageSize, String sortParam, String sortDir);
 }

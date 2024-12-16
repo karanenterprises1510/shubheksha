@@ -9,11 +9,13 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class ProductIdentifierResponseDto implements Serializable {
+public class ProductImageDto implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private Integer identifierId;
-	private String identifierName;
-	private String imgLink;
+	private Long imageId;
+	private String productImg;
+	private String productImgUrl;
+	private String productImgCaption;
+	private boolean isPrimary;
 }

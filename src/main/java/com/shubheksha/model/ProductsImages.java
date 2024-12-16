@@ -13,20 +13,30 @@ import lombok.Setter;
 import lombok.ToString;
 
 @Entity
-@Table(name = "identifier_master")
+@Table(name = "product_images")
 @ToString
 @Getter
 @Setter
-public class IdentifierMaster {
+public class ProductsImages {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer id;
+	private Long id;
 
-	@Column(name = "IDENTIFIER")
-	private String identifier;
+	@Column(name = "PRODUCT_ID")
+	private Long productId;
+
+	@Column(name = "IMG_NAME")
+	private String imgName;
+
+	@Column(name = "IMG_URL")
+	private String imgUrl;
 	
-	private String image;
+	@Column(name = "IMG_CAPTION")
+	private String imgCaption;
+
+	@Column(name = "IS_PRIMARY")
+	private String isPrimary = "N";
 
 	private String active;
 

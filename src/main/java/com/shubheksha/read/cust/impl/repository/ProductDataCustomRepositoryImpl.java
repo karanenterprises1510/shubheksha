@@ -29,9 +29,9 @@ public class ProductDataCustomRepositoryImpl implements ProductDataCustomReposit
 	private NamedParameterJdbcTemplate namedParameterMbJdbcTemplate;
 
 	@Override
-	public Page<ProductResponseDto> findProductData(List<Long> categoryIds, String productName, Integer sku,
-			Double offerPrice, Double listPrice, String keywords, Integer identifier, Integer pageNo, Integer pageSize,
-			String sortParam, String sortDir) {
+	public Page<ProductResponseDto> findProductData(List<Long> productIds, List<Long> categoryIds, String productName,
+			Integer sku, Double offerPrice, Double listPrice, String keywords, Integer identifier, Integer pageNo,
+			Integer pageSize, String sortParam, String sortDir) {
 		try {
 			log.info("ProductDataCustomRepositoryImpl getting product data");
 			MapSqlParameterSource namedParameters = new MapSqlParameterSource();
@@ -41,8 +41,13 @@ public class ProductDataCustomRepositoryImpl implements ProductDataCustomReposit
 					+ "pr.CANONICAL_URL as canonicalUrl, pr.KEYWORDS as keywords, im.IDENTIFIER as identifier, "
 					+ "pr.PERMALINK as permalink, pr.ACTIVE as active, pr.CREATEDATE as createDate, pr.MODIDATE as modiDate ";
 			String queryStringCount = "SELECT COUNT(*) ";
-			StringBuilder queryStringFrom = new StringBuilder(
-					" from products pr join category ct on pr.CATEGORY=ct.ID" + " and ct.ACTIVE='Y' join identifier_master im on im.id=pr.IDENTIFIER and im.ACTIVE='Y' where 1=1 ");
+			StringBuilder queryStringFrom = new StringBuilder(" from products pr join category ct on pr.CATEGORY=ct.ID"
+					+ " and ct.ACTIVE='Y' left join identifier_master im on im.id=pr.IDENTIFIER and im.ACTIVE='Y' where 1=1 ");
+
+			if (CollectionUtils.isNotEmpty(productIds)) {
+				queryStringFrom.append("and pr.ID IN (:productIds) ");
+				namedParameters.addValue("productIds", productIds);
+			}
 
 			if (CollectionUtils.isNotEmpty(categoryIds)) {
 				queryStringFrom.append("and pr.CATEGORY IN (:category) ");
