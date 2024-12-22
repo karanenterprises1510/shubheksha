@@ -19,9 +19,11 @@ import com.shubheksha.model.Cart;
 import com.shubheksha.model.CartProductMap;
 import com.shubheksha.model.Inventory;
 import com.shubheksha.model.Products;
+import com.shubheksha.model.ProductsImages;
 import com.shubheksha.read.repository.CartProductMapRepository;
 import com.shubheksha.read.repository.CartRepository;
 import com.shubheksha.read.repository.InventoryRepository;
+import com.shubheksha.read.repository.ProductsImagesRepository;
 import com.shubheksha.read.repository.ProductsRepository;
 import com.shubheksha.service.CartService;
 import com.shubheksha.utils.Constant;
@@ -51,6 +53,9 @@ public class CartServiceImpl implements CartService {
 
 	@Autowired
 	ProductsRepository productsRepository;
+
+	@Autowired
+	ProductsImagesRepository productsImagesRepository;
 
 	@Override
 	public Long saveCartDetails(List<CartRequestDto> request) {
@@ -144,6 +149,8 @@ public class CartServiceImpl implements CartService {
 			if (prod.isPresent()) {
 				obj.setListPrice(prod.get().getListPrice());
 				obj.setProductName(prod.get().getProductName());
+				ProductsImages prodImage = productsImagesRepository
+						.findTop1ByProductIdAndIsPrimaryAndActive(prod.get().getId(), Constant.YES, Constant.YES);
 			}
 			return obj;
 		}).collect(Collectors.toList());

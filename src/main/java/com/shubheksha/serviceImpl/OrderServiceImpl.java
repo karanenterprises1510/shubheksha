@@ -91,7 +91,7 @@ public class OrderServiceImpl implements OrderService {
 							String msg = "New order recived on shubheksha.com \nOrder Amt : " + order.getOrderAmt()
 									+ "\nOrder ID - " + order.getId()
 									+ "\nKindly approve or reject on clicking the link https://www.google.co.in";
-							twilioService.sendSms(Constant.SELLER_MOBILE, msg);
+//							twilioService.sendSms(Constant.SELLER_MOBILE, msg);
 						} else {
 							log.warn("customer mobile id is not valid : {}", request.getMobile());
 						}

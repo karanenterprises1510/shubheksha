@@ -11,5 +11,7 @@ import com.shubheksha.model.ProductsImages;
 public interface ProductsImagesRepository extends JpaRepository<ProductsImages, Long> {
 
 	List<ProductsImages> findByProductIdAndActive(Long productId, String active);
+	
+	ProductsImages findTop1ByProductIdAndIsPrimaryAndActive(Long productId, String isPrimary, String active);
 
 }

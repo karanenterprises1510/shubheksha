@@ -18,4 +18,5 @@ public class CartRequestDto {
 	Double unitPrice;
 	Double listPrice;
 	String productName;
+	String productImg;
 }
