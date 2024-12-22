@@ -151,6 +151,9 @@ public class CartServiceImpl implements CartService {
 				obj.setProductName(prod.get().getProductName());
 				ProductsImages prodImage = productsImagesRepository
 						.findTop1ByProductIdAndIsPrimaryAndActive(prod.get().getId(), Constant.YES, Constant.YES);
+				if (ObjectUtils.isNotEmpty(prodImage)) {
+					obj.setProductImg(prodImage.getImgUrl());
+				}
 			}
 			return obj;
 		}).collect(Collectors.toList());

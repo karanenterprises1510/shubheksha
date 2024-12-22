@@ -106,6 +106,7 @@ public class CategoryServiceImpl implements CategoryService {
 					final CategoryTreeResponseDto category = new CategoryTreeResponseDto();
 					category.setCategoryId(parentCat.getId());
 					category.setCategoryName(parentCat.getCategoryName());
+					category.setCategoryImg(parentCat.getCategoryImg());
 					fetchCategoryTree(parentCat.getId(), category);
 					categories.add(category);
 				});
@@ -127,6 +128,7 @@ public class CategoryServiceImpl implements CategoryService {
 				final CategoryTreeResponseDto childCategory = new CategoryTreeResponseDto();
 				childCategory.setCategoryId(childCat.getId());
 				childCategory.setCategoryName(childCat.getCategoryName());
+				childCategory.setCategoryImg(childCat.getCategoryImg());
 				fetchCategoryTree(childCat.getId(), childCategory);
 				catList.add(childCategory);
 			});

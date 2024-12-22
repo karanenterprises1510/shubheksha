@@ -21,11 +21,15 @@ import com.shubheksha.model.CartProductMap;
 import com.shubheksha.model.Customers;
 import com.shubheksha.model.Inventory;
 import com.shubheksha.model.Orders;
+import com.shubheksha.model.Products;
+import com.shubheksha.model.ProductsImages;
 import com.shubheksha.read.repository.CartProductMapRepository;
 import com.shubheksha.read.repository.CartRepository;
 import com.shubheksha.read.repository.CustomersRepository;
 import com.shubheksha.read.repository.InventoryRepository;
 import com.shubheksha.read.repository.OrdersRepository;
+import com.shubheksha.read.repository.ProductsImagesRepository;
+import com.shubheksha.read.repository.ProductsRepository;
 import com.shubheksha.service.OrderService;
 import com.shubheksha.service.common.TwilioService;
 import com.shubheksha.utils.Constant;
@@ -65,6 +69,12 @@ public class OrderServiceImpl implements OrderService {
 
 	@Autowired
 	InventoryRepository inventoryRepository;
+	
+	@Autowired
+	ProductsRepository productsRepository;
+
+	@Autowired
+	ProductsImagesRepository productsImagesRepository;
 
 	private Orders processOrder(final OrderRequestDto request) {
 		Orders order = null;
@@ -255,6 +265,16 @@ public class OrderServiceImpl implements OrderService {
 				obj.setNoOfUnit(data.getUnit());
 				obj.setProductId(data.getProductId());
 				obj.setUnitPrice(data.getUnitPrice());
+				Optional<Products> prod = productsRepository.findById(data.getProductId());
+				if (prod.isPresent()) {
+					obj.setListPrice(prod.get().getListPrice());
+					obj.setProductName(prod.get().getProductName());
+					ProductsImages prodImage = productsImagesRepository
+							.findTop1ByProductIdAndIsPrimaryAndActive(prod.get().getId(), Constant.YES, Constant.YES);
+					if (ObjectUtils.isNotEmpty(prodImage)) {
+						obj.setProductImg(prodImage.getImgUrl());
+					}
+				}
 				return obj;
 			}).collect(Collectors.toList());
 			cartDetails.setProductList(prodDetails);

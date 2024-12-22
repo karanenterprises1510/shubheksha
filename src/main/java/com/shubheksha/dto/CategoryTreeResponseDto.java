@@ -16,5 +16,6 @@ public class CategoryTreeResponseDto implements Serializable {
 
 	private Long categoryId;
 	private String categoryName;
+	private String categoryImg;
 	private List<CategoryTreeResponseDto> childCategories;
 }
