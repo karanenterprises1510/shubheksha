@@ -16,5 +16,6 @@ public class CartRequestDto {
 	Long productId;
 	Integer noOfUnit;
 	Double unitPrice;
-
+	Double listPrice;
+	String productName;
 }

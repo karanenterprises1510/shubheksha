@@ -18,4 +18,5 @@ public class CartResponseDto {
 	Long cartId;
 	List<CartRequestDto> productList;
 	Double totalAmount;
+	Double totalMRP;
 }

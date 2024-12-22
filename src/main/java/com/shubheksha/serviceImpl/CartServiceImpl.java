@@ -18,9 +18,11 @@ import com.shubheksha.dto.CartResponseDto;
 import com.shubheksha.model.Cart;
 import com.shubheksha.model.CartProductMap;
 import com.shubheksha.model.Inventory;
+import com.shubheksha.model.Products;
 import com.shubheksha.read.repository.CartProductMapRepository;
 import com.shubheksha.read.repository.CartRepository;
 import com.shubheksha.read.repository.InventoryRepository;
+import com.shubheksha.read.repository.ProductsRepository;
 import com.shubheksha.service.CartService;
 import com.shubheksha.utils.Constant;
 import com.shubheksha.write.repository.CartProductMapWriteRepository;
@@ -46,6 +48,9 @@ public class CartServiceImpl implements CartService {
 
 	@Autowired
 	InventoryRepository inventoryRepository;
+
+	@Autowired
+	ProductsRepository productsRepository;
 
 	@Override
 	public Long saveCartDetails(List<CartRequestDto> request) {
@@ -135,11 +140,18 @@ public class CartServiceImpl implements CartService {
 			obj.setNoOfUnit(data.getUnit());
 			obj.setProductId(data.getProductId());
 			obj.setUnitPrice(data.getUnitPrice());
+			Optional<Products> prod = productsRepository.findById(data.getProductId());
+			if (prod.isPresent()) {
+				obj.setListPrice(prod.get().getListPrice());
+				obj.setProductName(prod.get().getProductName());
+			}
 			return obj;
 		}).collect(Collectors.toList());
 		cartDetails.setProductList(prodDetails);
 		cartDetails.setTotalAmount(
 				prodDetails.stream().mapToDouble(data -> data.getNoOfUnit() * data.getUnitPrice()).sum());
+		cartDetails
+				.setTotalMRP(prodDetails.stream().mapToDouble(data -> data.getNoOfUnit() * data.getListPrice()).sum());
 		return cartDetails;
 	}
 }
