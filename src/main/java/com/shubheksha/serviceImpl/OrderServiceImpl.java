@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -30,6 +31,7 @@ import com.shubheksha.read.repository.InventoryRepository;
 import com.shubheksha.read.repository.OrdersRepository;
 import com.shubheksha.read.repository.ProductsImagesRepository;
 import com.shubheksha.read.repository.ProductsRepository;
+import com.shubheksha.service.MailService;
 import com.shubheksha.service.OrderService;
 import com.shubheksha.service.common.TwilioService;
 import com.shubheksha.utils.Constant;
@@ -75,6 +77,9 @@ public class OrderServiceImpl implements OrderService {
 
 	@Autowired
 	ProductsImagesRepository productsImagesRepository;
+	
+	@Autowired
+	MailService mailService;
 
 	private Orders processOrder(final OrderRequestDto request) {
 		Orders order = null;
@@ -98,10 +103,15 @@ public class OrderServiceImpl implements OrderService {
 							order = getOrderEntity(request, customerId);
 							order = orderWriteRepository.save(order);
 							// Sending message to seller.
-							String msg = "New order recived on shubheksha.com \nOrder Amt : " + order.getOrderAmt()
-									+ "\nOrder ID - " + order.getId()
-									+ "\nKindly approve or reject on clicking the link https://www.google.co.in";
+							String msg = "New order received on shubheksha.com <br>Order Amt : " + order.getOrderAmt()
+									+ "<br>Order ID - " + order.getId()
+									+ "<br>Kindly approve or reject on clicking the link https://www.google.co.in";
 //							twilioService.sendSms(Constant.SELLER_MOBILE, msg);
+							String[] toEmail = new String[1];
+							toEmail[0] = Constant.SHUBHEKSHA_SELLER_EMAIL_ID;
+							CompletableFuture.runAsync(() -> {
+								mailService.sendMail(toEmail, null, null, "New Order", msg, null);
+							});
 						} else {
 							log.warn("customer mobile id is not valid : {}", request.getMobile());
 						}
