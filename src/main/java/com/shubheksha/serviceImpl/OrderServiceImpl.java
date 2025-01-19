@@ -1,6 +1,7 @@
 package com.shubheksha.serviceImpl;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -35,6 +36,7 @@ import com.shubheksha.service.MailService;
 import com.shubheksha.service.OrderService;
 import com.shubheksha.service.common.TwilioService;
 import com.shubheksha.utils.Constant;
+import com.shubheksha.utils.VelocityUtility;
 import com.shubheksha.write.repository.CustomersWriteRepository;
 import com.shubheksha.write.repository.InventoryWriteRepository;
 import com.shubheksha.write.repository.OrdersWriteRepository;
@@ -71,15 +73,18 @@ public class OrderServiceImpl implements OrderService {
 
 	@Autowired
 	InventoryRepository inventoryRepository;
-	
+
 	@Autowired
 	ProductsRepository productsRepository;
 
 	@Autowired
 	ProductsImagesRepository productsImagesRepository;
-	
+
 	@Autowired
 	MailService mailService;
+
+	@Autowired
+	private VelocityUtility velocityUtility;
 
 	private Orders processOrder(final OrderRequestDto request) {
 		Orders order = null;
@@ -103,14 +108,30 @@ public class OrderServiceImpl implements OrderService {
 							order = getOrderEntity(request, customerId);
 							order = orderWriteRepository.save(order);
 							// Sending message to seller.
-							String msg = "New order received on shubheksha.com <br>Order Amt : " + order.getOrderAmt()
-									+ "<br>Order ID - " + order.getId()
-									+ "<br>Kindly approve or reject on clicking the link https://www.google.co.in";
+//							String msg = "New order received on shubheksha.com <br>Order Amt : " + order.getOrderAmt()
+//									+ "<br>Order ID - " + order.getId()
+//									+ "<br>Kindly approve or reject on clicking the link https://www.google.co.in";
 //							twilioService.sendSms(Constant.SELLER_MOBILE, msg);
-							String[] toEmail = new String[1];
+							final OrderResponseDto orderDetail = mapOrderEntityToDto(order);
+							final String vmFile = "order.vm";
+							Map<String, Object> map = new HashMap<>();
+							map.put("orderDate", Constant.getFormattedDate(order.getCreatedate()));
+							map.put("custName", orderDetail.getCustName());
+							map.put("custMob", orderDetail.getCustPhone());
+							map.put("custEmail", orderDetail.getCustEmail());
+							map.put("addr", orderDetail.getCustAddress());
+							map.put("city", orderDetail.getCustCity());
+							map.put("state", orderDetail.getCustState());
+							map.put("pincode", orderDetail.getCustPincode());
+							map.put("gst", orderDetail.getCustGst());
+							map.put("orderId", order.getId());
+							map.put("prodList", orderDetail.getCartDetails().getProductList());
+							final String content = velocityUtility.getVmContent(vmFile, map);
+							final String[] toEmail = new String[1];
 							toEmail[0] = Constant.SHUBHEKSHA_SELLER_EMAIL_ID;
 							CompletableFuture.runAsync(() -> {
-								mailService.sendMail(toEmail, null, null, "New Order", msg, null);
+								mailService.sendMail(toEmail, null, null,
+										"New Order Received from " + orderDetail.getCustName(), content, null);
 							});
 						} else {
 							log.warn("customer mobile id is not valid : {}", request.getMobile());

@@ -1,5 +1,7 @@
 package com.shubheksha.utils;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,14 +54,14 @@ public class Constant {
 	public static final String SELLER_MOBILE = "9821377646";
 
 	public static final String INDIAN_ISD = "+91";
-	
-	public static final String SHUBHEKSHA_FROM_EMAIL_ID = "s.piyush0708@gmail.com";
-	
-	public static final String SHUBHEKSHA_USERNAME = "s.piyush0708";
-	
-	public static final String SHUBHEKSHA_PWD = "lbsd hdfr yxwp lspl";
-	
-	public static final String SHUBHEKSHA_SELLER_EMAIL_ID = "imanshul1996@gmail.com";
+
+	public static final String SHUBHEKSHA_FROM_EMAIL_ID = "thewholesalestreet@gmail.com";
+
+	public static final String SHUBHEKSHA_USERNAME = "thewholesalestreet";
+
+	public static final String SHUBHEKSHA_PWD = "asfo qkom tmkw auhx ";
+
+	public static final String SHUBHEKSHA_SELLER_EMAIL_ID = "wholesalestreetorders@gmail.com";
 
 	public static boolean isValidEmailId(String emailId) {
 		if (StringUtils.isNotBlank(emailId)) {
@@ -77,5 +79,13 @@ public class Constant {
 			return m.matches();
 		}
 		return false;
+	}
+
+	public static final String getFormattedDate(Date date) {
+		if (date != null) {
+			SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+			return sdf.format(date);
+		}
+		return null;
 	}
 }
