@@ -1,5 +1,7 @@
 package com.shubheksha.serviceImpl;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +15,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.xhtmlrenderer.pdf.ITextRenderer;
 
 import com.shubheksha.dto.CartRequestDto;
 import com.shubheksha.dto.CartResponseDto;
@@ -127,11 +130,30 @@ public class OrderServiceImpl implements OrderService {
 							map.put("orderId", order.getId());
 							map.put("prodList", orderDetail.getCartDetails().getProductList());
 							final String content = velocityUtility.getVmContent(vmFile, map);
+							String[] fileNames = new String[1];
+							String fileName = orderDetail.getCustName() + "_invoice.pdf";
+							fileNames[0] = fileName;
+							File pdfOutputFile = new File(fileName);
+
+							// Create a PDF renderer
+							ITextRenderer renderer = new ITextRenderer();
+
+							// Load HTML string
+							renderer.setDocumentFromString(content);
+
+							// Render the document to a PDF file
+							renderer.layout();
+
+							try (FileOutputStream os = new FileOutputStream(pdfOutputFile)) {
+								renderer.createPDF(os);
+							} catch (Exception e) {
+								log.error("Getting Exception while converting html to pdf - ", e);
+							}
 							final String[] toEmail = new String[1];
 							toEmail[0] = Constant.SHUBHEKSHA_SELLER_EMAIL_ID;
 							CompletableFuture.runAsync(() -> {
-								mailService.sendMail(toEmail, null, null,
-										"New Order Received from " + orderDetail.getCustName(), content, null);
+								mailService.sendMail(toEmail, null,
+										"New Order Received from " + orderDetail.getCustName(), content, fileNames);
 							});
 						} else {
 							log.warn("customer mobile id is not valid : {}", request.getMobile());

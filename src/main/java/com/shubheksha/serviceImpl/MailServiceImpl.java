@@ -1,6 +1,6 @@
 package com.shubheksha.serviceImpl;
 
-import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Properties;
@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import com.shubheksha.service.MailService;
 import com.shubheksha.utils.Constant;
 
+import jakarta.activation.DataHandler;
+import jakarta.activation.FileDataSource;
 import jakarta.annotation.PostConstruct;
 import jakarta.mail.Authenticator;
 import jakarta.mail.BodyPart;
@@ -41,8 +43,7 @@ public class MailServiceImpl implements MailService {
 	private static final String SMPT_TLS_FLAG = "true";
 
 	@Override
-	public boolean sendMail(String[] toemail, String[] ccemail, String[] fileNames, String subject, String msgContent,
-			ByteArrayOutputStream[] outputStreams) {
+	public boolean sendMail(String[] toemail, String[] ccemail, String subject, String msgContent, String[] fileNames) {
 		try {
 			Message message = new MimeMessage(session);
 			message.setHeader("X-Priority", "3");
@@ -64,13 +65,20 @@ public class MailServiceImpl implements MailService {
 			BodyPart messageBodyPart = new MimeBodyPart();
 			messageBodyPart.setContent(msgContent, MAIL_FORMAT);
 			multipart.addBodyPart(messageBodyPart);
-
+			File[] files = null;
 			if (fileNames != null) {
-				for (int i = 0; i < fileNames.length; i++) {
-					MimeBodyPart attachment = new MimeBodyPart();
-					attachment.setFileName(fileNames[i]);
-					attachment.setContent(outputStreams[i].toByteArray(), "application/vnd.ms-excel");
-					multipart.addBodyPart(attachment);
+				files = new File[fileNames.length];
+				int counter = 0;
+				for (String fileName : fileNames) {
+					File file = new File(fileName);
+					files[counter++] = file;
+					if (file != null && file.exists()) {
+						BodyPart attachment = new MimeBodyPart();
+						FileDataSource source = new FileDataSource(file);
+						attachment.setDataHandler(new DataHandler(source));
+						attachment.setFileName(file.getName());
+						multipart.addBodyPart(attachment);
+					}
 				}
 			}
 			message.setContent(multipart);
@@ -79,6 +87,11 @@ public class MailServiceImpl implements MailService {
 			log.error("Mail going to mail: {} ", Arrays.toString(toemail));
 			Long start = System.currentTimeMillis();
 			Transport.send(message);
+			if (files != null) {
+				for (File file : files) {
+					file.delete();
+				}
+			}
 			log.info("Mail going transport " + (System.currentTimeMillis() - start));
 			log.error("Mail was sent successfully to: {}", Arrays.toString(toemail));
 			return true;

@@ -75,7 +75,7 @@
           alt="logo"
         />
         <h1>Shubheksha</h1>
-        <p>Date: $orderDate</p>
+        <p style="font-weight:bold;margin-left: auto;">Date: $orderDate</p>
       </div>
       <div class="customer-details">
         <h3>Customer Details</h3>
@@ -108,19 +108,25 @@
           </tr>
         </thead>
         <tbody>
+        #set($sum = 0)
 		#foreach ($prod in $prodList)
 		#set($index = $foreach.index + 1)
 		#set($totalPrice = $prod.unitPrice * $prod.noOfUnit)
+		#set($sum = $sum + $totalPrice)
 			<tr>
 			<td>$index</td>
             <td>$prod.productId</td>
             <td>$prod.productName</td>
-            <td><img src="$prod.productImg" style="height:50px; width:100%"></td>
+            <td><img src="$prod.productImg" style="height:50px; width:100%"/></td>
             <td>$prod.unitPrice</td>
             <td>$prod.noOfUnit</td>
             <td>$totalPrice</td>
-          </tr>
+          	</tr>
 		#end
+			<tr>
+		        <td colspan="6" style="font-weight: bold; text-align: center;">Total</td>
+                <td colspan="1">$sum</td>
+		    </tr>
         </tbody>
       </table>
     </div>
