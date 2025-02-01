@@ -21,7 +21,7 @@ public class MasterDataController {
 	@Autowired
 	MasterDataService masterService;
 
-	@GetMapping("/get-master-data")
+	@GetMapping(value = "/get-master-data", produces = "application/json")
 	public ResponseEntity<?> getMasterData() {
 		final Map<String, Object> result = new HashMap<>();
 		String status = null;
